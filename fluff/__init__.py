@@ -719,7 +719,7 @@ class FluffPillow(PythonPillow):
 
     def change_transform(self, doc_dict):
         delete = False
-
+        print 'processing {}'.format(doc_dict['_id'])
         doc = self.wrapper.wrap(doc_dict)
         doc = ReadOnlyObject(doc)
 
