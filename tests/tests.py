@@ -1,4 +1,7 @@
 from django.conf import settings
+from pillowtop.feed.couch import change_from_couch_row
+from pillowtop.feed.interface import Change
+
 settings.configure(DEBUG=True, SQL_REPORTING_DATABASE_URL="postgresql://postgres:postgres@localhost/fluff_test")
 
 import sqlalchemy
@@ -152,7 +155,7 @@ class Test(TestCase):
         for cls in [MockIndicators, MockIndicatorsWithGetters]:
             classname = cls.__name__
             pillow = cls.pillow()(chunk_size=0)
-            pillow.processor({'changes': [], 'id': '123', 'seq': 1, 'doc': doc})
+            pillow.processor(Change(id='123', sequence_id=1, document=doc))
             indicator = self.fakedb.mock_docs.get("%s-123" % classname, None)
             self.assertIsNotNone(indicator)
             self.assertEqual(10, len(indicator))
@@ -518,7 +521,7 @@ class Test(TestCase):
         for cls in [MockIndicators, MockIndicatorsWithGetters]:
             classname = cls.__name__
             pillow = cls.pillow()(chunk_size=0)
-            pillow.processor({'changes': [], 'id': '123', 'seq': 1, 'doc': doc})
+            pillow.processor(change_from_couch_row({'changes': [], 'id': '123', 'seq': 1, 'doc': doc}))
             indicator = self.fakedb.mock_docs.get("%s-123" % classname, None)
             self.assertIsNotNone(indicator)
 
@@ -526,7 +529,7 @@ class Test(TestCase):
         for cls in [MockIndicators, MockIndicatorsWithGetters]:
             classname = cls.__name__
             pillow = cls.pillow()(chunk_size=0)
-            pillow.processor({'changes': [], 'id': '123', 'seq': 1, 'doc': doc})
+            pillow.processor(change_from_couch_row({'changes': [], 'id': '123', 'seq': 1, 'doc': doc}))
             indicator = self.fakedb.mock_docs.get("%s-123" % classname, None)
             self.assertIsNone(indicator)
 
@@ -542,7 +545,7 @@ class Test(TestCase):
 
         for cls in [MockIndicatorsSql]:
             pillow = cls.pillow()(chunk_size=0)
-            pillow.processor({'changes': [], 'id': '123', 'seq': 1, 'doc': doc})
+            pillow.processor(change_from_couch_row({'changes': [], 'id': '123', 'seq': 1, 'doc': doc}))
             with self.engine.begin() as connection:
                 rows = connection.execute(sqlalchemy.select([cls._table]))
                 self.assertEqual(rows.rowcount, 6)
@@ -550,7 +553,7 @@ class Test(TestCase):
         doc['doc_type'] = 'MockArchive'
         for cls in [MockIndicatorsSql]:
             pillow = cls.pillow()(chunk_size=0)
-            pillow.processor({'changes': [], 'id': '123', 'seq': 1, 'doc': doc})
+            pillow.processor(change_from_couch_row({'changes': [], 'id': '123', 'seq': 1, 'doc': doc}))
             with self.engine.begin() as connection:
                 rows = connection.execute(sqlalchemy.select([cls._table]))
                 self.assertEqual(rows.rowcount, 0)
