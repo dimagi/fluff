@@ -89,7 +89,7 @@ def rebuild_table(engine, pillow_class, indicator_doc):
         if owner:
             connection.execute('ALTER TABLE "%s" OWNER TO %s' % (table.name, owner))
     if pillow_class:
-        pillow_class().reset_checkpoint()
+        pillow_class().reset()
 
 
 def get_migration_context(connection, table_names):
